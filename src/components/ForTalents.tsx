@@ -12,21 +12,21 @@ const ForTalents = () => {
     },
     {
       icon: Calendar,
-      title: "Flexibilidade total",
-      description: "Escolha seus projetos, horários e forma de trabalho. Você tem o controle.",
-      highlight: "100% flexível"
+      title: "Flexibilidade justa",
+      description: "Equilibramos autonomia e estabilidade. Flexibilidade real sem abrir mão dos seus direitos.",
+      highlight: "Flexibilidade com propósito"
     },
     {
       icon: Eye,
-      title: "Maior visibilidade",
-      description: "Seu perfil é visto por empresas de qualidade que valorizam seu trabalho.",
-      highlight: "Exposição qualificada"
+      title: "Inclusão e pertencimento",
+      description: "Ambiente diverso e inclusivo onde todos os talentos são valorizados pelo seu potencial.",
+      highlight: "Diversidade real"
     },
     {
       icon: Heart,
-      title: "Benefícios opcionais",
-      description: "Acesso a plano de saúde, cursos e outros benefícios quando desejar.",
-      highlight: "Sua escolha"
+      title: "Bem-estar no trabalho",
+      description: "Priorizamos sua saúde mental, equilíbrio vida-trabalho e desenvolvimento pessoal.",
+      highlight: "Bem-estar em primeiro lugar"
     }
   ];
 
@@ -67,8 +67,8 @@ const ForTalents = () => {
               Para <span className="text-secondary">Talentos</span>
             </h2>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Maximize sua renda e tenha controle total sobre sua carreira. Conecte-se com empresas 
-              que valorizam seu trabalho e oferecem oportunidades reais de crescimento.
+              Faça parte da revolução do futuro do trabalho. Conecte-se com empresas que promovem 
+              inclusão, respeitam sua individualidade e valorizam seu bem-estar acima de tudo.
             </p>
 
             <div className="space-y-6 mb-8">

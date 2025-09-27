@@ -18,11 +18,11 @@ const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto animate-fade-in">
           <h1 className="hero-title mb-6">
-            Contrate e seja contratado de forma simples, rápida e justa
+            O futuro do trabalho é agora: flexível, justo e transparente
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Mais renda para profissionais, menos custo para empresas, com transparência e curadoria de qualidade
+            Conectamos talentos e empresas com IA responsável, promovendo inclusão, bem-estar e transparência ética no mercado de trabalho
           </p>
 
           {/* CTA Buttons */}

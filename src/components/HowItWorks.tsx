@@ -9,8 +9,8 @@ const HowItWorks = () => {
     },
     {
       icon: Search,
-      title: "Passe pela curadoria",
-      description: "Nossa equipe analisa seu perfil para garantir qualidade e compatibilidade com as oportunidades."
+      title: "IA responsável + curadoria humana",
+      description: "Usamos IA de forma ética para potencializar nossa curadoria humana, garantindo matches justos e inclusivos."
     },
     {
       icon: Handshake,

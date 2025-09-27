@@ -4,21 +4,21 @@ const ValueProposition = () => {
   const differentials = [
     {
       icon: Users,
-      title: "Curadoria humana + tecnologia",
-      description: "Combinamos análise humana especializada com algoritmos inteligentes para matches perfeitos.",
-      stats: "95% de aprovação nos matches"
+      title: "IA responsável + curadoria humana",
+      description: "Combinamos inteligência artificial ética com análise humana para promover inclusão e diversidade nos matches.",
+      stats: "IA ética e transparente"
     },
     {
       icon: Lightbulb,
-      title: "Modelo transparente",
-      description: "Valores, processos e critérios claros. Sem taxas ocultas ou surpresas desagradáveis.",
+      title: "Transparência ética",
+      description: "Algoritmos auditáveis, processos claros e critérios justos. Você sabe exatamente como funcionamos.",
       stats: "100% transparência"
     },
     {
       icon: FileText,
-      title: "Sem burocracia",
-      description: "Processo simplificado, contratos digitais e pagamentos automáticos. Foco no que importa: o trabalho.",
-      stats: "3 cliques para começar"
+      title: "Bem-estar e flexibilidade",
+      description: "Priorizamos o equilíbrio vida-trabalho e oferecemos flexibilidade real sem comprometer direitos.",
+      stats: "Flexibilidade justa"
     }
   ];
 
@@ -34,11 +34,11 @@ const ValueProposition = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Nossa proposta de valor
+            Liderando as tendências do futuro do trabalho
           </h2>
           <p className="text-xl text-white/90 max-w-3xl mx-auto">
-            Revolucionamos a forma como talentos e empresas se conectam, 
-            priorizando qualidade, transparência e resultados reais.
+            Respondemos às principais transformações do mercado: IA responsável, inclusão real, 
+            flexibilidade justa, bem-estar no trabalho e transparência ética.
           </p>
         </div>
 
