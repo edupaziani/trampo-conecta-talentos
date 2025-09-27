@@ -6,11 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRight, Building, User } from "lucide-react";
+import { ArrowRight, Building, User, AlertCircle } from "lucide-react";
+import { leadCaptureSchema, empresaSchema, talentoSchema, sanitizeInput, type LeadCaptureFormData } from "@/lib/validation";
+import { z } from "zod";
 
 const LeadCapture = () => {
   const [activeTab, setActiveTab] = useState<"empresa" | "talento">("empresa");
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LeadCaptureFormData>({
     nome: "",
     email: "",
     telefone: "",
@@ -23,50 +25,141 @@ const LeadCapture = () => {
     aceita_contato: false
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitAttempts, setSubmitAttempts] = useState(0);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.aceita_termos) {
+    // Rate limiting check
+    if (submitAttempts >= 5) {
       toast({
-        title: "Erro",
-        description: "É necessário aceitar os termos de uso e política de privacidade.",
+        title: "Muitas tentativas",
+        description: "Aguarde alguns minutos antes de tentar novamente.",
         variant: "destructive",
       });
       return;
     }
 
+    // Clear previous errors
+    setErrors({});
     setIsLoading(true);
 
-    // Simulated form submission
-    setTimeout(() => {
-      toast({
-        title: "Cadastro realizado!",
-        description: "Entraremos em contato em breve. Bem-vindo(a) à Trampô!",
+    try {
+      // Sanitize inputs before validation
+      const sanitizedData = {
+        ...formData,
+        nome: sanitizeInput.name(formData.nome),
+        email: sanitizeInput.email(formData.email),
+        telefone: sanitizeInput.phone(formData.telefone),
+        empresa: sanitizeInput.name(formData.empresa),
+        cargo: sanitizeInput.text(formData.cargo),
+        necessidade: sanitizeInput.text(formData.necessidade),
+      };
+
+      // Choose appropriate schema based on active tab
+      const schema = activeTab === "empresa" ? empresaSchema : talentoSchema;
+      
+      // Validate form data
+      const validatedData = schema.parse(sanitizedData);
+
+      // Increment submit attempts for rate limiting
+      setSubmitAttempts(prev => prev + 1);
+
+      // Simulated form submission with security logging
+      console.log("Form submitted successfully for:", activeTab, {
+        hasEmail: !!validatedData.email,
+        hasPhone: !!validatedData.telefone,
+        timestamp: new Date().toISOString(),
       });
+
+      setTimeout(() => {
+        toast({
+          title: "Cadastro realizado!",
+          description: "Entraremos em contato em breve. Bem-vindo(a) à Trampô!",
+        });
+        setIsLoading(false);
+        
+        // Reset form
+        setFormData({
+          nome: "",
+          email: "",
+          telefone: "",
+          empresa: "",
+          cargo: "",
+          area: "",
+          experiencia: "",
+          necessidade: "",
+          aceita_termos: false,
+          aceita_contato: false
+        });
+        setSubmitAttempts(0);
+      }, 2000);
+
+    } catch (error) {
       setIsLoading(false);
       
-      // Reset form
-      setFormData({
-        nome: "",
-        email: "",
-        telefone: "",
-        empresa: "",
-        cargo: "",
-        area: "",
-        experiencia: "",
-        necessidade: "",
-        aceita_termos: false,
-        aceita_contato: false
-      });
-    }, 2000);
+      if (error instanceof z.ZodError) {
+        // Handle validation errors
+        const formErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path.length > 0) {
+            formErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(formErrors);
+        
+        toast({
+          title: "Erro de validação",
+          description: "Por favor, corrija os campos destacados em vermelho.",
+          variant: "destructive",
+        });
+      } else {
+        // Handle unexpected errors
+        toast({
+          title: "Erro inesperado",
+          description: "Ocorreu um erro. Tente novamente em alguns minutos.",
+          variant: "destructive",
+        });
+        console.error("Form submission error:", error);
+      }
+    }
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
+
+    // Apply real-time sanitization for text inputs
+    let sanitizedValue = value;
+    if (typeof value === "string") {
+      switch (field) {
+        case "nome":
+        case "empresa":
+          sanitizedValue = sanitizeInput.name(value);
+          break;
+        case "email":
+          sanitizedValue = sanitizeInput.email(value);
+          break;
+        case "telefone":
+          sanitizedValue = sanitizeInput.phone(value);
+          break;
+        case "cargo":
+        case "necessidade":
+          sanitizedValue = sanitizeInput.text(value);
+          break;
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: sanitizedValue
     }));
   };
 
@@ -123,7 +216,15 @@ const LeadCapture = () => {
                     onChange={(e) => handleInputChange("nome", e.target.value)}
                     required
                     placeholder="Seu nome completo"
+                    maxLength={100}
+                    className={errors.nome ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
+                  {errors.nome && (
+                    <div className="flex items-center space-x-1 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{errors.nome}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Email */}
@@ -136,7 +237,15 @@ const LeadCapture = () => {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
                     placeholder="seu@email.com"
+                    maxLength={255}
+                    className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
+                  {errors.email && (
+                    <div className="flex items-center space-x-1 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{errors.email}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Telefone */}
@@ -149,7 +258,15 @@ const LeadCapture = () => {
                     onChange={(e) => handleInputChange("telefone", e.target.value)}
                     required
                     placeholder="(11) 99999-9999"
+                    maxLength={15}
+                    className={errors.telefone ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
+                  {errors.telefone && (
+                    <div className="flex items-center space-x-1 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{errors.telefone}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Campo específico por tipo */}
@@ -163,13 +280,24 @@ const LeadCapture = () => {
                       onChange={(e) => handleInputChange("empresa", e.target.value)}
                       required
                       placeholder="Nome da sua empresa"
+                      maxLength={100}
+                      className={errors.empresa ? "border-destructive focus-visible:ring-destructive" : ""}
                     />
+                    {errors.empresa && (
+                      <div className="flex items-center space-x-1 text-sm text-destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{errors.empresa}</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Label htmlFor="experiencia">Nível de experiência *</Label>
-                    <Select onValueChange={(value) => handleInputChange("experiencia", value)}>
-                      <SelectTrigger>
+                    <Select 
+                      onValueChange={(value) => handleInputChange("experiencia", value)}
+                      value={formData.experiencia}
+                    >
+                      <SelectTrigger className={errors.experiencia ? "border-destructive focus-visible:ring-destructive" : ""}>
                         <SelectValue placeholder="Selecione seu nível" />
                       </SelectTrigger>
                       <SelectContent>
@@ -179,6 +307,12 @@ const LeadCapture = () => {
                         <SelectItem value="especialista">Especialista (10+ anos)</SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.experiencia && (
+                      <div className="flex items-center space-x-1 text-sm text-destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{errors.experiencia}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -194,14 +328,25 @@ const LeadCapture = () => {
                     onChange={(e) => handleInputChange("cargo", e.target.value)}
                     required
                     placeholder={activeTab === "empresa" ? "Diretor, Gerente, etc." : "Desenvolvimento, Design, Marketing, etc."}
+                    maxLength={100}
+                    className={errors.cargo ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
+                  {errors.cargo && (
+                    <div className="flex items-center space-x-1 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{errors.cargo}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Área de interesse */}
                 <div className="space-y-2">
                   <Label htmlFor="area">Área de interesse *</Label>
-                  <Select onValueChange={(value) => handleInputChange("area", value)}>
-                    <SelectTrigger>
+                  <Select 
+                    onValueChange={(value) => handleInputChange("area", value)}
+                    value={formData.area}
+                  >
+                    <SelectTrigger className={errors.area ? "border-destructive focus-visible:ring-destructive" : ""}>
                       <SelectValue placeholder="Selecione a área" />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,6 +359,12 @@ const LeadCapture = () => {
                       <SelectItem value="outros">Outros</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.area && (
+                    <div className="flex items-center space-x-1 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{errors.area}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -234,28 +385,47 @@ const LeadCapture = () => {
                     : "Exemplo: Busco projetos de design que me permitam trabalhar remotamente..."
                   }
                   rows={4}
+                  maxLength={1000}
+                  className={errors.necessidade ? "border-destructive focus-visible:ring-destructive" : ""}
                 />
+                {errors.necessidade && (
+                  <div className="flex items-center space-x-1 text-sm text-destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{errors.necessidade}</span>
+                  </div>
+                )}
+                <div className="text-xs text-muted-foreground text-right">
+                  {formData.necessidade.length}/1000 caracteres
+                </div>
               </div>
 
               {/* Checkboxes */}
               <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="termos"
-                    checked={formData.aceita_termos}
-                    onCheckedChange={(checked) => handleInputChange("aceita_termos", checked as boolean)}
-                  />
-                  <Label htmlFor="termos" className="text-sm leading-relaxed">
-                    Aceito os{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      termos de uso
-                    </a>{" "}
-                    e{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      política de privacidade
-                    </a>{" "}
-                    da Trampô *
-                  </Label>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="termos"
+                      checked={formData.aceita_termos}
+                      onCheckedChange={(checked) => handleInputChange("aceita_termos", checked as boolean)}
+                    />
+                    <Label htmlFor="termos" className="text-sm leading-relaxed">
+                      Aceito os{" "}
+                      <a href="#" className="text-primary hover:underline">
+                        termos de uso
+                      </a>{" "}
+                      e{" "}
+                      <a href="#" className="text-primary hover:underline">
+                        política de privacidade
+                      </a>{" "}
+                      da Trampô *
+                    </Label>
+                  </div>
+                  {errors.aceita_termos && (
+                    <div className="flex items-center space-x-1 text-sm text-destructive ml-6">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{errors.aceita_termos}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-start space-x-3">
