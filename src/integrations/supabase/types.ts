@@ -14,16 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          contact_email: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          application_email: string | null
+          application_link: string | null
+          area: string
+          company_id: string
+          created_at: string
+          description: string
+          id: string
+          job_type: Database["public"]["Enums"]["job_type"]
+          modality: Database["public"]["Enums"]["work_modality"]
+          status: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_email?: string | null
+          application_link?: string | null
+          area: string
+          company_id: string
+          created_at?: string
+          description: string
+          id?: string
+          job_type: Database["public"]["Enums"]["job_type"]
+          modality: Database["public"]["Enums"]["work_modality"]
+          status?: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_email?: string | null
+          application_link?: string | null
+          area?: string
+          company_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          job_type?: Database["public"]["Enums"]["job_type"]
+          modality?: Database["public"]["Enums"]["work_modality"]
+          status?: Database["public"]["Enums"]["job_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talents: {
+        Row: {
+          area_of_interest: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          area_of_interest: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          area_of_interest?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      job_status: "pendente" | "aprovada" | "reprovada"
+      job_type: "estagio" | "efetivo" | "freela"
+      work_modality: "presencial" | "remoto" | "hibrido"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +286,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      job_status: ["pendente", "aprovada", "reprovada"],
+      job_type: ["estagio", "efetivo", "freela"],
+      work_modality: ["presencial", "remoto", "hibrido"],
+    },
   },
 } as const

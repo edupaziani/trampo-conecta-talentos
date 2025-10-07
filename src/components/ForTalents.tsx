@@ -90,8 +90,11 @@ const ForTalents = () => {
               ))}
             </div>
 
-            <Button className="btn-secondary">
-              Quero trabalhar com autonomia
+            <Button 
+              className="btn-secondary"
+              onClick={() => window.location.href = "/vagas"}
+            >
+              Ver Vagas Disponíveis
             </Button>
           </div>
         </div>

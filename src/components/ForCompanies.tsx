@@ -62,8 +62,11 @@ const ForCompanies = () => {
               ))}
             </div>
 
-            <Button className="btn-hero">
-              Quero contratar talentos
+            <Button 
+              className="btn-hero"
+              onClick={() => window.location.href = "/divulgar-vaga"}
+            >
+              Divulgar Vaga
             </Button>
           </div>
 
